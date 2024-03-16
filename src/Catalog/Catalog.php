@@ -41,10 +41,7 @@ class Catalog {
         }
     }
 
-    /**
-     * @return Product
-     */
-    public function getProductByCode(string $code): Product {
+    public function getProductByCode(string $code): Product|null {
         return $this->products[$code] ?? null;
     }
 

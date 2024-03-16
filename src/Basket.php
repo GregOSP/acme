@@ -14,22 +14,28 @@ class Basket {
     private array $products = [];
 
     /**
+     * @var array<string, OfferInterface> $offers
+    */
+    private array $offers = [];
+
+    /**
      * @param array<array{'limit': float, 'charge': float}> $deliveryChargeRules
      * @param array<OfferInterface> $offers
      */
-    public function __construct(private Catalog $catalog, private array $deliveryChargeRules, private array $offers = []) {}
+    public function __construct(private Catalog $catalog, private array $deliveryChargeRules, array $offers = []) {
+        foreach ($offers as $offer) {
+            $this->offers[get_class($offer)] = $offer;
+        }
+    }
 
     public function addOffer(OfferInterface $offer): void {
         // Are there offer limits?
-        // TODO: Currently can add the same offer twice, but that shouldn't be possible
-        $this->offers[] = $offer;
+        // Using associative array to only allow adding one instance of a specific offer
+        $this->offers[get_class($offer)] = $offer;
     }
 
     public function add(string $productCode): void {
         $catalogProduct = $this->catalog->getProductByCode($productCode);
-        // phpstan thinks the if statement is always true, but it should be coming back null if product is not defined in catalog.
-        // See Catalog\Catalog.php
-        // @phpstan-ignore-next-line
         if ($catalogProduct) {
             $this->products[] = clone $catalogProduct;
         }
@@ -43,6 +49,9 @@ class Basket {
         // Quick way to reset all the prices in the basket 
         foreach ($this->products as $product) {
             $catalogProduct = $this->catalog->getProductByCode($product->getCode());
+            if(!$catalogProduct){
+                throw new \Exception("Cart contains product not in catalog");
+            }
             $product->updatePrice($catalogProduct->getPrice());
         }
 
