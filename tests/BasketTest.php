@@ -71,7 +71,7 @@ class BasketTest extends TestCase
         $this->assertEquals(54.37, $basket->total());
     }
 
-
+    // Checking that the same offer can't be added twice
     public function testBasketMultiOffer(): void
     {
         $basket = new Basket($this->catalog, $this->deliveryChargeRules, [new BuyOneGetOneHalfOffRed()]);
